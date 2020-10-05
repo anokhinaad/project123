@@ -8,10 +8,14 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    model.cpp \
+    tree.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    model.h \
+    tree.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

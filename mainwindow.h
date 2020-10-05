@@ -32,5 +32,8 @@ private:
     QAction *editElementAction; // редактировать элемент
     QAction *upElementAction; // переместить элемент вверх
     QAction *downElementAction; // переместить элемент вниз
+
+    QMenu *fileMenu;
+    QMenu *editMenu;
 };
 #endif // MAINWINDOW_H

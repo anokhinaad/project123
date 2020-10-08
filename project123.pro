@@ -10,11 +10,13 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     model.cpp \
+    node.cpp \
     tree.cpp
 
 HEADERS += \
     mainwindow.h \
     model.h \
+    node.h \
     tree.h
 
 # Default rules for deployment.

@@ -5,6 +5,7 @@
 
 class Tree;
 class QAction;
+class Model;
 
 class MainWindow : public QMainWindow
 {
@@ -25,6 +26,7 @@ public slots:
 
 private:
     Tree *tree;
+    Model *model;
     QAction *openFileAction; // открытие файла
     QAction *saveFlieAction; // сохранение в файл
     QAction *addElementAction; // добавить элемент

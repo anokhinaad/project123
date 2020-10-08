@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include <QObject>
+#include <node.h>
 
 class Node;
 
@@ -14,6 +15,8 @@ public:
     void clearModel(); // очистка
     void setModel(const QStringList &lines); // заполнение данными из файла
 
+    Node *getNodeFromIndex (const QModelIndex &index) const;
+
     // QAbstractItemModel interface
 public:
     virtual QModelIndex index(int row, int column, const QModelIndex &parent) const override;
@@ -24,7 +27,8 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
-    QList<Node *> nodes; // список узлов по мере чтения файла
+    Node  *rootNode; //
+
 };
 
 #endif // MODEL_H

@@ -13,11 +13,7 @@ Node::~Node()
 
 Node *Node::child(int row)
 {
-    //if (children.isEmpty()) return 0;
-   // if (row>=0 && row < children.size())
-        return children.value(row);
-
-    //return 0;
+    return children.value(row);
 }
 
 int Node::childNumber() const
@@ -45,12 +41,12 @@ int Node::childrenCount() const
 
 Node *Node::insertNode(int pos)
 {
-     if (pos<0 || pos >children.size()) return 0;
+    if (pos<0 || pos >children.size()) return 0;
 
-     Node *node = new Node(QString(), this); // создали узел дочерн для текущего
-     children.insert(pos, node); // и вставили
+    Node *node = new Node(QString(), this); // создали узел дочерн для текущего
+    children.insert(pos, node); // и вставили
 
-     return node;
+    return node;
 }
 
 bool Node::insert(int pos, int count)
@@ -69,4 +65,17 @@ bool Node::setData(const QString &s)
     if (data==s) return false;
     data = s;
     return true;
+}
+
+QString Node::getDataAsString(int nodeIndex, int parentIndex)
+{
+    if (parentIndex == 0)
+        return QString("%1  # %2  #")
+            .arg(nodeIndex)
+            .arg(getData());
+
+    return QString("%1  # %2  #  %3")
+            .arg(nodeIndex)
+            .arg(getData())
+            .arg(parentIndex);
 }

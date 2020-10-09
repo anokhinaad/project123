@@ -22,6 +22,8 @@ public:
     bool insert(int pos, int count); // позиция и кол-во доч элем
     bool setData(const QString &s);
 
+    QString getDataAsString(int nodeIndex, int parentIndex);
+
 
 private:
     QString data;

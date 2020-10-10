@@ -49,6 +49,48 @@ Node *Node::insertNode(int pos)
     return node;
 }
 
+bool Node::insertNode(int pos, Node *node)
+{
+     if (pos<0 || pos >children.size()) return false;
+     children.insert(pos, node);
+     node->parent=this;
+     return true;
+}
+
+bool Node::removeNodes(int row, int count)
+{
+    // проверка
+    if (row<0 || row+count > children.size()) return false;
+
+    for (int i=0; i<count; ++i) {
+        // Node *node = children.takeAt(row);
+        // delete node; по одному и тому же индексу три раза
+        delete children.takeAt(row);
+    }
+    return true;
+}
+
+bool Node::moveNode(int from, int to)
+{
+    if (from<0 || to<0 || from>=children.size() || to>=children.size()) return false;
+    if (from==to) return false;
+
+    Node *node = children.takeAt(from);
+    children.insert(to, node);
+
+    return true;
+}
+
+bool Node::takeNode(int row)
+{
+    if (row<0 || row>=childrenCount()) return false;
+
+    children.takeAt(row);
+    return true;
+}
+
+
+
 bool Node::insert(int pos, int count)
 {
     if (pos<0 || pos >children.size()) return false;

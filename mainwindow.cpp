@@ -5,6 +5,7 @@
 #include <tree.h>
 #include <model.h>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,14 +16,16 @@ MainWindow::MainWindow(QWidget *parent)
     tree->setModel(model);
 
     openFileAction = new QAction ("Открыть файл", this);
-    connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile())); // connect(openFileAction, &QAction::triggered, this, &MainWindow::openFile)
-                                                                           // connect(openFileAction, &QAction::triggered, [=](){ openFile(); })
+    connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    saveFlieAction = new QAction ("Сохранить файл", this);
-    connect(saveFlieAction, SIGNAL(triggered()), this, SLOT(saveFlie()));
+    saveFileAction = new QAction ("Сохранить файл", this);
+    connect(saveFileAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 
     addElementAction = new QAction ("Добавить элемент", this);
     connect(addElementAction, SIGNAL(triggered()), this, SLOT(addElement()));
+
+    addChildElementAction = new QAction("Добавить дочерний элемент", this);
+    connect(addChildElementAction, SIGNAL(triggered()), this, SLOT(addChildElement()));
 
     delElementAction = new QAction ("Удалить элемент", this);
     connect(delElementAction, SIGNAL(triggered()), this, SLOT(delElement()));
@@ -36,12 +39,18 @@ MainWindow::MainWindow(QWidget *parent)
     downElementAction = new QAction ("Переместить элемент вниз", this);
     connect(downElementAction, SIGNAL(triggered()), this, SLOT(downElement()));
 
+    connect(tree->selectionModel(), &QItemSelectionModel::currentChanged,
+            [=](const QModelIndex &current, const QModelIndex &previous){
+        tree->closePersistentEditor(previous);
+    });
+
     fileMenu = this->menuBar()->addMenu("Файл");
     fileMenu->addAction(openFileAction);
-    fileMenu->addAction(saveFlieAction);
+    fileMenu->addAction(saveFileAction);
 
     editMenu = menuBar()->addMenu("Правка");
     editMenu->addAction(addElementAction);
+    editMenu->addAction(addChildElementAction);
     editMenu->addAction(delElementAction);
     editMenu->addAction(editElementAction);
     editMenu->addAction(upElementAction);
@@ -76,22 +85,20 @@ void MainWindow::openFile()
         QStringList list = content.split("\n");
 
         model->clearModel();
-
         model->setModel(list);
+        setWindowTitle(QString("Работа с деревом - %1").arg(QFileInfo(fileName).fileName()));
     }
 }
 
-void MainWindow::saveFlie()
+void MainWindow::saveFile()
 {
     QFileDialog dialog;
     QString fileName = dialog.getSaveFileName(this, "Выберите файл", QString(), "Текстовые файлы (*.txt)");
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
-    QStringList list;
-    if (file.open(QFile::WriteOnly | QFile::Text)) {
-        QString content = file.readAll();
 
+    if (file.open(QFile::WriteOnly | QFile::Text)) {
         QStringList list = model->getData();
 
         if (list.isEmpty()) {
@@ -101,7 +108,7 @@ void MainWindow::saveFlie()
 
         file.write(list.join("\n").toUtf8());
 
-        QMessageBox::information(this, "Сохранение файла", "Файл успешно сохранён");
+        QMessageBox::information(this, "Сохранение файла", "Файл успешно сохранен");
     }
     else {
         QMessageBox::critical(this, "Сохранение файла", "Не удалось открыть файл");
@@ -110,12 +117,45 @@ void MainWindow::saveFlie()
 
 void MainWindow::addElement()
 {
+    QModelIndex index = tree->selectionModel()->currentIndex();
 
+    if (index.isValid()) {
+        if (!model->insertRow(index.row()+1, index.parent()))
+            return;
+
+        QModelIndex insertedRow = model->index(index.row()+1, 0, index.parent());
+        model->setData(insertedRow, "[]", Qt::EditRole);
+
+        tree->selectionModel()->setCurrentIndex(insertedRow, QItemSelectionModel::ClearAndSelect);
+        tree->openPersistentEditor(insertedRow);
+    }
+}
+
+void MainWindow::addChildElement()
+{
+    QModelIndex index = tree->selectionModel()->currentIndex();
+
+    if (index.isValid()) {
+        const int childrenCount = model->rowCount(index);
+        if (!model->insertRow(childrenCount, index))
+            return;
+
+        //теперь childrenCount указывает на последний дочер элемент
+        QModelIndex insertedChild = model->index(childrenCount, 0, index);
+        model->setData(insertedChild, "[]", Qt::EditRole);
+
+        tree->selectionModel()->setCurrentIndex(insertedChild, QItemSelectionModel::ClearAndSelect);
+        tree->openPersistentEditor(insertedChild);
+    }
 }
 
 void MainWindow::delElement()
 {
+    QModelIndex indexToDel = tree->selectionModel()->currentIndex();
 
+    if (indexToDel.isValid()) {
+        model->removeRow(indexToDel.row(), indexToDel.parent());
+    }
 }
 
 void MainWindow::editElement()
@@ -124,17 +164,33 @@ void MainWindow::editElement()
 
     if (indexToEdit.isValid()) {
         tree->openPersistentEditor(indexToEdit);
-
     }
 }
 
 void MainWindow::upElement()
 {
+    QModelIndex indexToMove = tree->selectionModel()->currentIndex();
 
+    if (indexToMove.isValid()) {
+        model->moveUp(indexToMove);
+    }
 }
 
 void MainWindow::downElement()
 {
+    QModelIndex indexToMove = tree->selectionModel()->currentIndex();
 
+    if (indexToMove.isValid()) {
+        model->moveDown(indexToMove);
+    }
 }
 
+
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    QModelIndex indexToEdit = tree->selectionModel()->currentIndex();
+    if (event->key() == Qt::Key_Return && indexToEdit.isValid()) {
+        tree->closePersistentEditor(indexToEdit);
+    }
+}

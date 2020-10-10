@@ -18,6 +18,12 @@ public:
     int childrenCount() const;
 
     Node *insertNode(int pos);
+    bool removeNodes(int row, int count);
+
+    bool moveNode(int from, int to);
+
+    bool takeNode(int row);
+    bool insertNode(int pos, Node *node);
 
     bool insert(int pos, int count); // позиция и кол-во доч элем
     bool setData(const QString &s);

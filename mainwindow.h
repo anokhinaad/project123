@@ -17,8 +17,9 @@ public:
 
 public slots:
     void openFile();
-    void saveFlie();
+    void saveFile();
     void addElement();
+    void addChildElement();
     void delElement();
     void editElement();
     void upElement();
@@ -28,8 +29,9 @@ private:
     Tree *tree;
     Model *model;
     QAction *openFileAction; // открытие файла
-    QAction *saveFlieAction; // сохранение в файл
+    QAction *saveFileAction; // сохранение в файл
     QAction *addElementAction; // добавить элемент
+    QAction *addChildElementAction; // доб дочерний элем
     QAction *delElementAction; // удалить элемент
     QAction *editElementAction; // редактировать элемент
     QAction *upElementAction; // переместить элемент вверх
@@ -37,5 +39,10 @@ private:
 
     QMenu *fileMenu;
     QMenu *editMenu;
+
+
+    // QWidget interface
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
 };
 #endif // MAINWINDOW_H

@@ -2,6 +2,7 @@
 #include <node.h>
 #include <QMessageBox>
 #include <QMap>
+#include <QtDebug>
 
 Model::Model()
 {
@@ -62,8 +63,7 @@ void Model::setModel(const QStringList &lines) // принимает списо�
         //обработка правильной строки
 
         QString nodeIndexString = list.first().simplified();
-
-        if (nodeIndexString.length()>6) {
+        if (nodeIndexString.length() > 6) {
             QMessageBox::warning(0, "Ошибка в структуре данных",
                                  "Слишком длинный индекс");
             continue;
@@ -211,9 +211,104 @@ Node *Model::getNodeFromIndex(const QModelIndex &index) const
 
 bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    if (!index.isValid()) return false;
+
+    Node *node = getNodeFromIndex(index);
+    switch (role) {
+    case Qt::EditRole: {
+        if (node->setData(value.toString())) {
+            QVector<int> roles;
+            roles << Qt::DisplayRole;
+            emit dataChanged(index, index, roles);
+            return true;
+        }
+        break;
+    }
+    default: return false;
+    }
+    return false;
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex &index) const
 {
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+}
+
+
+bool Model::removeRows(int row, int count, const QModelIndex &parent)
+{
+    Node *parentNode = getNodeFromIndex(parent);
+
+    //сигнал модели о том, что сейчас будут удаляться элементы
+    beginRemoveRows(parent, row, row+count-1);
+
+    bool result = parentNode->removeNodes(row, count);
+
+    //сигнал модели о том, что удаление элементов завершено
+    endRemoveRows();
+    return result;
+}
+
+
+bool Model::insertRows(int row, int count, const QModelIndex &parent)
+{
+    Node *parentNode = getNodeFromIndex(parent);
+
+    beginInsertRows(parent, row, row+count-1);
+    bool result = parentNode->insert(row, count);
+    endInsertRows();
+
+    return result;
+}
+
+void Model::moveUp(const QModelIndex &indexToMove)
+{
+    Node *node = getNodeFromIndex(indexToMove);
+    Node *parent = node->getParent();
+
+    int sourceChild = node->childNumber();
+    int destChild = sourceChild;
+
+    bool success = false;
+    if (sourceChild == 0) {
+        if (parent != rootNode) {
+            destChild = parent->childNumber();
+            beginMoveRows(indexToMove.parent(), sourceChild, sourceChild,
+                          indexToMove.parent().parent(), destChild);
+
+            Node *destParent = parent->getParent();
+
+            if (parent->takeNode(node->childNumber())) {
+                success = destParent->insertNode(destChild, node);
+            }
+            endMoveRows();
+        }
+    }
+    else {
+        destChild--;
+        beginMoveRows(indexToMove.parent(), sourceChild, sourceChild, indexToMove.parent(), destChild);
+        success = parent->moveNode(sourceChild, destChild);
+        endMoveRows();
+    }
+}
+
+void Model::moveDown(const QModelIndex &indexToMove)
+{
+    Node *node = getNodeFromIndex(indexToMove);
+    Node *parent = node->getParent();
+
+    int sourceChild = node->childNumber();
+    int children = parent->childrenCount();
+
+    int destChild = sourceChild;
+
+    bool success = false;
+    if (sourceChild < children-1) {
+        destChild = sourceChild + 1;
+        beginMoveRows(indexToMove.parent(), sourceChild, sourceChild,
+                      indexToMove.parent(), destChild+1);
+
+        success = parent->moveNode(sourceChild, destChild);
+        endMoveRows();
+    }
 }

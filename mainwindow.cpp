@@ -15,29 +15,32 @@ MainWindow::MainWindow(QWidget *parent)
     model = new Model();
     tree->setModel(model);
 
+    AboutAction = new QAction ("О программе", this);
+    connect(AboutAction, SIGNAL(triggered()), this, SLOT(About()));
+
     openFileAction = new QAction ("Открыть файл", this);
     connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
 
     saveFileAction = new QAction ("Сохранить файл", this);
     connect(saveFileAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 
-    addElementAction = new QAction ("Добавить элемент", this);
-    connect(addElementAction, SIGNAL(triggered()), this, SLOT(addElement()));
+    addElementAction = new QPushButton ("Добавить элемент", this);
+    connect(addElementAction, SIGNAL(released()), this, SLOT(addElement()));
 
-    addChildElementAction = new QAction("Добавить дочерний элемент", this);
-    connect(addChildElementAction, SIGNAL(triggered()), this, SLOT(addChildElement()));
+    addChildElementAction = new QPushButton ("Добавить дочерний элемент", this);
+    connect(addChildElementAction, SIGNAL(released()), this, SLOT(addChildElement()));
 
-    delElementAction = new QAction ("Удалить элемент", this);
-    connect(delElementAction, SIGNAL(triggered()), this, SLOT(delElement()));
+    delElementAction = new QPushButton ("Удалить элемент", this);
+    connect(delElementAction, SIGNAL(released()), this, SLOT(delElement()));
 
-    editElementAction = new QAction ("Редактировать элемент", this);
-    connect(editElementAction, SIGNAL(triggered()), this, SLOT(editElement()));
+    editElementAction = new QPushButton ("Редактировать элемент", this);
+    connect(editElementAction, SIGNAL(released()), this, SLOT(editElement()));
 
-    upElementAction = new QAction ("Переместить элемент вверх", this);
-    connect(upElementAction, SIGNAL(triggered()), this, SLOT(upElement()));
+    upElementAction = new QPushButton ("Переместить элемент вверх", this);
+    connect(upElementAction, SIGNAL(released()), this, SLOT(upElement()));
 
-    downElementAction = new QAction ("Переместить элемент вниз", this);
-    connect(downElementAction, SIGNAL(triggered()), this, SLOT(downElement()));
+    downElementAction = new QPushButton ("Переместить элемент вниз", this);
+    connect(downElementAction, SIGNAL(released()), this, SLOT(downElement()));
 
     connect(tree->selectionModel(), &QItemSelectionModel::currentChanged,
             [=](const QModelIndex &current, const QModelIndex &previous){
@@ -48,22 +51,31 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction(openFileAction);
     fileMenu->addAction(saveFileAction);
 
-    editMenu = menuBar()->addMenu("Правка");
-    editMenu->addAction(addElementAction);
-    editMenu->addAction(addChildElementAction);
-    editMenu->addAction(delElementAction);
-    editMenu->addAction(editElementAction);
-    editMenu->addAction(upElementAction);
-    editMenu->addAction(downElementAction);
+    editMenu = menuBar()->addMenu("Справка");
+    editMenu->addAction(AboutAction);
+   // editMenu->addAction(addElementAction);
+    //editMenu->addAction(addChildElementAction);
+    //editMenu->addAction(delElementAction);
+    //editMenu->addAction(editElementAction);
+    //editMenu->addAction(upElementAction);
+    //editMenu->addAction(downElementAction);
 
     QWidget *widget = new QWidget(this);
     QVBoxLayout *l = new QVBoxLayout(this); // упорядочивание по вертикали
     l->addWidget(tree);
+
+    l->addWidget(addElementAction);
+    l->addWidget(addChildElementAction);
+    l->addWidget(delElementAction);
+    l->addWidget(editElementAction);
+    l->addWidget(upElementAction);
+    l->addWidget(downElementAction);
+
     widget->setLayout(l); // установка компоновки
 
     setCentralWidget(widget);
 
-    resize(500, 300);
+    resize(700, 500);
     show();
 }
 
@@ -183,6 +195,12 @@ void MainWindow::downElement()
     if (indexToMove.isValid()) {
         model->moveDown(indexToMove);
     }
+}
+
+void MainWindow::About()
+{
+    QMessageBox::information(this, "О программе", "В ходе выполнения тествого задания была реализована данная программа");
+
 }
 
 

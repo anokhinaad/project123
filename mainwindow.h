@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 
 class Tree;
 class QAction;
@@ -25,17 +26,23 @@ public slots:
     void upElement();
     void downElement();
 
+    void About();
+
+
+
 private:
     Tree *tree;
     Model *model;
     QAction *openFileAction; // открытие файла
     QAction *saveFileAction; // сохранение в файл
-    QAction *addElementAction; // добавить элемент
-    QAction *addChildElementAction; // доб дочерний элем
-    QAction *delElementAction; // удалить элемент
-    QAction *editElementAction; // редактировать элемент
-    QAction *upElementAction; // переместить элемент вверх
-    QAction *downElementAction; // переместить элемент вниз
+    QPushButton *addElementAction; // добавить элемент
+    QPushButton *addChildElementAction; // доб дочерний элем
+    QPushButton *delElementAction; // удалить элемент
+    QPushButton *editElementAction; // редактировать элемент
+    QPushButton *upElementAction; // переместить элемент вверх
+    QPushButton *downElementAction; // переместить элемент вниз
+
+    QAction *AboutAction; // о программе
 
     QMenu *fileMenu;
     QMenu *editMenu;

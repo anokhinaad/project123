@@ -21,7 +21,7 @@ void Model::setModel(const QStringList &lines) // принимает списо�
 
     QMap<int, Node*> nodesMap;
 
-    foreach (const QString &s, lines) // указатель избавляет от копий
+    foreach (const QString &s, lines) //
     {
         QStringList list = s.split("#");
         const int listSize = list.size();
@@ -62,10 +62,18 @@ void Model::setModel(const QStringList &lines) // принимает списо�
 
         //обработка правильной строки
 
-        QString nodeIndexString = list.first().simplified();
+        QString nodeIndexString = list.first().simplified(); // проверка на индекс не больше 6 символов
         if (nodeIndexString.length() > 6) {
             QMessageBox::warning(0, "Ошибка в структуре данных",
                                  "Слишком длинный индекс");
+            continue;
+        }
+
+        QString nodeStStr = list.at(1); // проверка на текст не более пятидесяти символов
+        if (nodeStStr.length() > 50) {
+            QMessageBox::warning(0, "Ошибка в структуре данных",
+                                 QString("Строка %1 имеет неподходящую структуру.\n"
+                                         "Текст превышает допустимое количество символов.").arg(s));
             continue;
         }
 
